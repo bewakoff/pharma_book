@@ -1,0 +1,121 @@
+[
+  {
+    "name": "Paracetamol",
+    "manufactureDate": "2025-01-15",
+    "expiryDate": "2027-01-14",
+    "company": "ParaCare Labs",
+    "quantity": 150
+  },
+  {
+    "name": "Ibuprofen",
+    "manufactureDate": "2025-03-10",
+    "expiryDate": "2027-03-09",
+    "company": "IbuRelief Pharma",
+    "quantity": 120
+  },
+  {
+    "name": "Amoxicillin",
+    "manufactureDate": "2025-02-25",
+    "expiryDate": "2027-02-24",
+    "company": "AmoxiCure Biotech",
+    "quantity": 80
+  },
+  {
+    "name": "Atorvastatin",
+    "manufactureDate": "2024-05-20",
+    "expiryDate": "2026-05-19",
+    "company": "Lipitor Corp.",
+    "quantity": 250
+  },
+  {
+    "name": "Metformin",
+    "manufactureDate": "2024-08-01",
+    "expiryDate": "2026-07-31",
+    "company": "GlucoControl Inc.",
+    "quantity": 300
+  },
+  {
+    "name": "Lisinopril",
+    "manufactureDate": "2025-04-05",
+    "expiryDate": "2027-04-04",
+    "company": "HBP Solutions",
+    "quantity": 175
+  },
+  {
+    "name": "Omeprazole",
+    "manufactureDate": "2024-11-20",
+    "expiryDate": "2026-11-19",
+    "company": "AcidAway Pharma",
+    "quantity": 220
+  },
+  {
+    "name": "Levothyroxine",
+    "manufactureDate": "2025-01-01",
+    "expiryDate": "2027-12-31",
+    "company": "Thyroid Health",
+    "quantity": 90
+  },
+  {
+    "name": "Hydrochlorothiazide",
+    "manufactureDate": "2024-07-28",
+    "expiryDate": "2026-07-27",
+    "company": "Diuretic Dynamics",
+    "quantity": 180
+  },
+  {
+    "name": "Azithromycin",
+    "manufactureDate": "2025-03-01",
+    "expiryDate": "2027-02-28",
+    "company": "Z-Pack Pharma",
+    "quantity": 60
+  },
+  {
+    "name": "Gabapentin",
+    "manufactureDate": "2024-09-10",
+    "expiryDate": "2026-09-09",
+    "company": "Nerve Calm Inc.",
+    "quantity": 110
+  },
+  {
+    "name": "Sertraline",
+    "manufactureDate": "2025-04-18",
+    "expiryDate": "2027-04-17",
+    "company": "Zoloft Pharma",
+    "quantity": 140
+  },
+  {
+    "name": "Fluoxetine",
+    "manufactureDate": "2024-06-25",
+    "expiryDate": "2026-06-24",
+    "company": "Prozac Solutions",
+    "quantity": 105
+  },
+  {
+    "name": "Hydrocodone",
+    "manufactureDate": "2025-05-01",
+    "expiryDate": "2027-04-30",
+    "company": "PainRelief Inc.",
+    "quantity": 50
+  },
+  {
+    "name": "Metoprolol",
+    "manufactureDate": "2024-07-28",
+    "expiryDate": "2026-07-27",
+    "company": "BetaBlockers LTD",
+    "quantity": 180
+  },
+  {
+    "name": "Prednisone",
+    "manufactureDate": "2025-03-01",
+    "expiryDate": "2027-02-28",
+    "company": "CorticoCare",
+    "quantity": 60
+  },
+  {
+    "name": "Doxycycline",
+    "manufactureDate": "2024-09-10",
+    "expiryDate": "2026-09-09",
+    "company": "TetraPharm",
+    "quantity": 110
+  }
+]
