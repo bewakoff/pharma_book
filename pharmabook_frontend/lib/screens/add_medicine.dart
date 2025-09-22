@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../services/api_service.dart';
+import 'package:provider/provider.dart';
+import '../models/medicine.dart';
+import '../services/api_service.dart';
+import '../services/auth_service.dart';
+import 'add_medicine_form_screen.dart';
+import 'medicine_detail_screen.dart';
 
 class AddMedicineScreen extends StatefulWidget {
   const AddMedicineScreen({super.key});
@@ -10,171 +14,85 @@ class AddMedicineScreen extends StatefulWidget {
 }
 
 class _AddMedicineScreenState extends State<AddMedicineScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _companyController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController();
-  final TextEditingController _batchController = TextEditingController();
-  final TextEditingController _mfgController = TextEditingController();
-  final TextEditingController _expiryController = TextEditingController();
-
-  DateTime? _manufactureDate;
-  DateTime? _expiryDate;
-  bool _isSubmitting = false;
-
-  Future<void> _pickDate(bool isMfg) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-
-    if (picked != null) {
-      setState(() {
-        if (isMfg) {
-          _manufactureDate = picked;
-          _mfgController.text = DateFormat('yyyy-MM-dd').format(picked);
-        } else {
-          _expiryDate = picked;
-          _expiryController.text = DateFormat('yyyy-MM-dd').format(picked);
-        }
-      });
-    }
-  }
-
-  Future<void> _submitMedicine() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_manufactureDate == null || _expiryDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Please select both dates")),
-      );
-      return;
-    }
-
-    setState(() => _isSubmitting = true);
-
-    final medicineData = {
-      'name': _nameController.text.trim(),
-      'company': _companyController.text.trim(),
-      'batchNumber': _batchController.text.trim(),
-      'quantity': int.parse(_quantityController.text.trim()),
-      'manufactureDate': _manufactureDate!.toIso8601String(),
-      'expiryDate': _expiryDate!.toIso8601String(),
-    };
-
-    try {
-      await ApiService.addMedicine(context, medicineData);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("✅ Medicine added successfully")),
-        );
-        Navigator.pop(context, true);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("❌ Failed to add medicine: $e")),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
-    }
-  }
+  late Future<List<Medicine>> _medicinesFuture;
+  late ApiService apiService;
+  String _searchQuery = '';
 
   @override
-  void dispose() {
-    _nameController.dispose();
-    _companyController.dispose();
-    _quantityController.dispose();
-    _batchController.dispose();
-    _mfgController.dispose();
-    _expiryController.dispose();
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final authService = Provider.of<AuthService>(context, listen: false);
+    apiService = ApiService(authService);
+    _loadMedicines();
+  }
+
+  void _loadMedicines() {
+    setState(() {
+      _medicinesFuture = apiService.getMedicines();
+    });
+  }
+
+  void _navigateToDetail(Medicine medicine) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MedicineDetailScreen(medicine: medicine)),
+    );
+
+    if (result == true) _loadMedicines();
+  }
+
+  void _navigateToAddForm() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddMedicineFormScreen()),
+    );
+
+    if (result == true) _loadMedicines();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add New Medicine")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              _buildTextField(_nameController, "Medicine Name", "e.g., Paracetamol 500mg"),
-              const SizedBox(height: 16),
-              _buildTextField(_companyController, "Company Name", "e.g., ParaCare Labs"),
-              const SizedBox(height: 16),
-              _buildTextField(
-                _quantityController,
-                "Quantity",
-                "e.g., 100",
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value!.isEmpty) return "Enter quantity";
-                  if (int.tryParse(value) == null) return "Enter a valid number";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(_batchController, "Batch Number", "e.g., ABC123DEF"),
-              const SizedBox(height: 16),
-              _buildDateField(_mfgController, "Manufacture Date", true),
-              const SizedBox(height: 16),
-              _buildDateField(_expiryController, "Expiry Date", false),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitMedicine,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                child: _isSubmitting
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Add New Medicine", style: TextStyle(fontSize: 18)),
-              ),
-            ],
+      appBar: AppBar(title: const Text('My Inventory'), centerTitle: true),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              onChanged: (value) => setState(() => _searchQuery = value),
+              decoration: const InputDecoration(labelText: 'Search Medicines', prefixIcon: Icon(Icons.search), border: OutlineInputBorder()),
+            ),
           ),
-        ),
-      ),
-    );
-  }
+          Expanded(
+            child: FutureBuilder<List<Medicine>>(
+              future: _medicinesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+                if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
+                if (!snapshot.hasData || snapshot.data!.isEmpty) return const Center(child: Text('No medicines found.'));
 
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label,
-    String hint, {
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      keyboardType: keyboardType,
-      validator: validator ?? (value) => value!.isEmpty ? "Enter $label" : null,
-    );
-  }
+                final medicines = snapshot.data!.where((med) => med.name.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
 
-  Widget _buildDateField(TextEditingController controller, String label, bool isMfg) {
-    return TextFormField(
-      controller: controller,
-      readOnly: true,
-      onTap: () => _pickDate(isMfg),
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: "yyyy-MM-dd",
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        suffixIcon: const Icon(Icons.calendar_today),
+                return RefreshIndicator(
+                  onRefresh: () async => _loadMedicines(),
+                  child: ListView.builder(
+                    itemCount: medicines.length,
+                    itemBuilder: (context, index) {
+                      final med = medicines[index];
+                      final totalQuantity = med.batches.fold<int>(0, (sum, batch) => sum + batch.quantity);
+                      return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        child: ListTile(title: Text(med.name), subtitle: Text(med.company), trailing: Text('Stock: $totalQuantity', style: const TextStyle(fontSize: 16)), onTap: () => _navigateToDetail(med)),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
-      validator: (value) => value!.isEmpty ? "Select $label" : null,
+      floatingActionButton: FloatingActionButton.extended(onPressed: _navigateToAddForm, label: const Text('Add Medicine'), icon: const Icon(Icons.add)),
     );
   }
 }

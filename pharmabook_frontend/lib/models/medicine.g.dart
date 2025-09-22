@@ -6,24 +6,6 @@ part of 'medicine.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Batch _$BatchFromJson(Map<String, dynamic> json) => Batch(
-  batchNumber: json['batchNumber'] as String,
-  quantity: (json['quantity'] as num).toInt(),
-  manufactureDate: DateTime.parse(json['manufactureDate'] as String),
-  expiryDate: DateTime.parse(json['expiryDate'] as String),
-  variant: json['variant'] as String?,
-  price: (json['price'] as num?)?.toDouble() ?? 0.0,
-);
-
-Map<String, dynamic> _$BatchToJson(Batch instance) => <String, dynamic>{
-  'batchNumber': instance.batchNumber,
-  'quantity': instance.quantity,
-  'manufactureDate': instance.manufactureDate.toIso8601String(),
-  'expiryDate': instance.expiryDate.toIso8601String(),
-  'variant': instance.variant,
-  'price': instance.price,
-};
-
 Medicine _$MedicineFromJson(Map<String, dynamic> json) => Medicine(
   id: json['_id'] as String,
   name: json['name'] as String,
@@ -38,4 +20,22 @@ Map<String, dynamic> _$MedicineToJson(Medicine instance) => <String, dynamic>{
   'name': instance.name,
   'company': instance.company,
   'batches': instance.batches,
+};
+
+Batch _$BatchFromJson(Map<String, dynamic> json) => Batch(
+  batchNumber: json['batchNumber'] as String,
+  manufactureDate: DateTime.parse(json['manufactureDate'] as String),
+  expiryDate: DateTime.parse(json['expiryDate'] as String),
+  quantity: (json['quantity'] as num).toInt(),
+  variant: json['variant'] as String?,
+  price: (json['price'] as num).toDouble(),
+);
+
+Map<String, dynamic> _$BatchToJson(Batch instance) => <String, dynamic>{
+  'batchNumber': instance.batchNumber,
+  'manufactureDate': instance.manufactureDate.toIso8601String(),
+  'expiryDate': instance.expiryDate.toIso8601String(),
+  'quantity': instance.quantity,
+  'variant': instance.variant,
+  'price': instance.price,
 };

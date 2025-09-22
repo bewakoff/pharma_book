@@ -31,6 +31,11 @@ class ProfileScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 32),
+              Text(
+                'Role: ${authService.role ?? 'Unknown'}',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
                   authService.logout();

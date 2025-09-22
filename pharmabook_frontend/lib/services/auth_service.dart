@@ -46,31 +46,37 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'email': email, 'password': password}),
+  final response = await http.post(
+    Uri.parse('$_baseUrl/login'),
+    headers: {'Content-Type': 'application/json'},
+    body: json.encode({'email': email, 'password': password}),
+  );
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    _token = data['token'];
+    _userId = data['userId'];
+    _role = data['role'];
+    _enterpriseName = data['enterpriseName'];
+
+    _currentUser = User(
+      id: _userId!,
+      name: '', // backend doesn’t return name yet
+      email: data['email'],
     );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      _token = data['token'];
-      _userId = data['userId'];
-      _role = data['role'];
-      _enterpriseName = data['enterpriseName'];
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', _token!);
+    await prefs.setString('userId', _userId!);
+    await prefs.setString('role', _role ?? 'user');
+    await prefs.setString('enterpriseName', _enterpriseName ?? '');
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', _token!);
-      await prefs.setString('userId', _userId!);
-      await prefs.setString('role', _role!);
-      await prefs.setString('enterpriseName', _enterpriseName!);
-
-      await fetchCurrentUser();
-      notifyListeners();
-    } else {
-      throw Exception('Failed to login: ${json.decode(response.body)['message']}');
-    }
+    notifyListeners();
+  } else {
+    throw Exception('Failed to login: ${json.decode(response.body)['message']}');
   }
+}
+
 
   Future<void> signup(String email, String password, String enterpriseName) async {
     final response = await http.post(
@@ -108,10 +114,7 @@ class AuthService extends ChangeNotifier {
     _currentUser = null;
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    await prefs.remove('userId');
-    await prefs.remove('role');
-    await prefs.remove('enterpriseName');
+    await prefs.clear(); // A more robust way to clear all auth data
 
     notifyListeners();
   }
@@ -139,8 +142,10 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<void> updateName(String newName, BuildContext context) async {
-    if (_token == null || _userId == null) return;
+  Future<String> updateName(String newName) async {
+    if (_token == null || _userId == null) {
+      return 'User not authenticated.';
+    }
 
     try {
       final response = await http.put(
@@ -155,28 +160,19 @@ class AuthService extends ChangeNotifier {
       if (response.statusCode == 200) {
         _currentUser?.name = newName;
         notifyListeners();
-
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("✅ Name updated successfully")),
-        );
+        return 'Name updated successfully';
       } else {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Failed to update name: ${response.body}')),
-        );
+        return 'Failed to update name: ${response.body}';
       }
     } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error: $e')),
-      );
+      return 'An error occurred: $e';
     }
   }
 
-  Future<void> changePassword(
-      String oldPassword, String newPassword, BuildContext context) async {
-    if (_token == null || _userId == null) return;
+  Future<String> changePassword(String oldPassword, String newPassword) async {
+    if (_token == null || _userId == null) {
+      return 'User not authenticated.';
+    }
 
     try {
       final response = await http.put(
@@ -189,21 +185,12 @@ class AuthService extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("✅ Password changed successfully")),
-        );
+        return 'Password changed successfully';
       } else {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Failed to change password: ${response.body}')),
-        );
+        return 'Failed to change password: ${response.body}';
       }
     } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error: $e')),
-      );
+      return 'An error occurred: $e';
     }
   }
 }

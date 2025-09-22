@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/medicine.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -12,15 +14,14 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   late Future<List<Medicine>> _medicines;
   String _query = '';
+  late ApiService apiService;
 
   @override
-  void initState() {
-    super.initState();
-    _fetchMedicines();
-  }
-
-  void _fetchMedicines() {
-    _medicines = ApiService.getMedicines(context);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final authService = Provider.of<AuthService>(context, listen: false);
+    apiService = ApiService(authService);
+    _medicines = apiService.getMedicines();
   }
 
   void _searchMedicines(String query) {

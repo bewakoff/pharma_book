@@ -1,9 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const dotenv = require('dotenv');
+
+// Import all route files
 const medicineRoutes = require('./routes/medicines');
-const authRoutes = require('./routes/auth'); // Import the new auth routes
-const dotenv = require('dotenv'); // Import dotenv for environment variables
+const authRoutes = require('./routes/auth');
+const reportRoutes = require('./routes/reports');
+const billRoutes = require('./routes/bills');
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -22,8 +26,11 @@ app.use(cors()); // Enables Cross-Origin Resource Sharing for your Flutter app
 app.use(express.json()); // Parses incoming JSON requests
 
 // Routes
+// **FIX:** All app.use() calls for routes must be before app.listen()
 app.use('/api/medicines', medicineRoutes);
-app.use('/api/auth', authRoutes); // Use the new authentication routes
+app.use('/api/auth', authRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/bills', billRoutes);
 
 // Start the server
 app.listen(PORT, () => {

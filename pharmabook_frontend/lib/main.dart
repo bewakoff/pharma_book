@@ -7,9 +7,9 @@ import 'services/auth_service.dart';
 // Screens
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/search_screen.dart';
-import 'screens/add_medicine.dart';
-import 'screens/reports_screen.dart';
+import 'screens/add_medicine.dart'; // Inventory Screen
+import 'screens/products_screen.dart'; // New Screen
+import 'screens/billing_screen.dart';
 import 'screens/profile_screen.dart';
 
 void main() {
@@ -40,11 +40,11 @@ class PharmaBookApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ),
         cardTheme: const CardThemeData(
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(15)),
-  ),
-  elevation: 2,
-),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(15)),
+          ),
+          elevation: 2,
+        ),
       ),
       home: Consumer<AuthService>(
         builder: (context, auth, child) {
@@ -69,11 +69,12 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
+  // Updated list of pages
   final List<Widget> _pages = const [
     HomeScreen(),
-    SearchScreen(),
     AddMedicineScreen(),
-    ReportsScreen(),
+    ProductsScreen(), // Added new screen
+    BillingScreen(),
     ProfileScreen(),
   ];
 
@@ -93,14 +94,13 @@ class _MainNavigationState extends State<MainNavigation> {
         unselectedItemColor: Colors.grey,
         type: BottomNavigationBarType.fixed,
         onTap: _onItemTapped,
+        // Updated items
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.add_box), label: "Add Medicine"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart), label: "Reports"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.inventory_2_outlined), activeIcon: Icon(Icons.inventory_2), label: "Inventory"),
+          BottomNavigationBarItem(icon: Icon(Icons.sort_by_alpha_outlined), activeIcon: Icon(Icons.sort_by_alpha), label: "Products"),
+          BottomNavigationBarItem(icon: Icon(Icons.calculate_outlined), activeIcon: Icon(Icons.calculate), label: "Billing"),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: "Profile"),
         ],
       ),
     );

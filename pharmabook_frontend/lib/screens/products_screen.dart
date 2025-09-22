@@ -4,18 +4,17 @@ import '../models/medicine.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import 'medicine_detail_screen.dart';
-import 'add_medicine_form_screen.dart';
 
-class MedicineListScreen extends StatefulWidget {
-  const MedicineListScreen({super.key});
+class ProductsScreen extends StatefulWidget {
+  const ProductsScreen({super.key});
 
   @override
-  State<MedicineListScreen> createState() => _MedicineListScreenState();
+  State<ProductsScreen> createState() => _ProductsScreenState();
 }
 
-class _MedicineListScreenState extends State<MedicineListScreen> {
-  late ApiService apiService;
+class _ProductsScreenState extends State<ProductsScreen> {
   late Future<List<Medicine>> _medicinesFuture;
+  late ApiService apiService;
 
   @override
   void didChangeDependencies() {
@@ -31,33 +30,25 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
     });
   }
 
-  Future<void> _navigateToAddMedicine() async {
-    final added = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => const AddMedicineFormScreen()),
+  void _navigateToDetail(Medicine medicine) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MedicineDetailScreen(medicine: medicine),
+      ),
     );
-    if (added == true) _loadMedicines(); // Refresh inventory
-  }
 
-  Future<void> _navigateToMedicineDetail(Medicine medicine) async {
-    final updated = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => MedicineDetailScreen(medicine: medicine)),
-    );
-    if (updated == true) _loadMedicines(); // Refresh inventory after updates
+    if (result == true) {
+      _loadMedicines();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Medicines'),
+        title: const Text('All Products'),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Add Medicine',
-            onPressed: _navigateToAddMedicine,
-          ),
-        ],
       ),
       body: FutureBuilder<List<Medicine>>(
         future: _medicinesFuture,
@@ -67,10 +58,16 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No medicines available.'));
-          } else {
-            final medicines = snapshot.data!;
-            return ListView.builder(
+            return const Center(child: Text('No medicines found.'));
+          }
+
+          // Sort the medicines alphabetically by name
+          final medicines = snapshot.data!;
+          medicines.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+          return RefreshIndicator(
+            onRefresh: () async => _loadMedicines(),
+            child: ListView.builder(
               itemCount: medicines.length,
               itemBuilder: (context, index) {
                 final med = medicines[index];
@@ -78,16 +75,19 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
                   0,
                   (sum, batch) => sum + batch.quantity,
                 );
+
                 return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   child: ListTile(
-                    title: Text(med.name),
-                    subtitle: Text('Total Quantity: $totalQuantity'),
-                    onTap: () => _navigateToMedicineDetail(med),
+                    title: Text(med.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(med.company),
+                    trailing: Text('Stock: $totalQuantity'),
+                    onTap: () => _navigateToDetail(med),
                   ),
                 );
               },
-            );
-          }
+            ),
+          );
         },
       ),
     );

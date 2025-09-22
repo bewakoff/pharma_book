@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/medicine.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -12,12 +14,15 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> {
   late Future<List<Medicine>> _dailyReports;
   late Future<List<Medicine>> _weeklyReports;
+  late ApiService apiService;
 
   @override
-  void initState() {
-    super.initState();
-    _dailyReports = ApiService.getDailyReport(context);
-    _weeklyReports = ApiService.getWeeklyReport(context);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final authService = Provider.of<AuthService>(context, listen: false);
+    apiService = ApiService(authService);
+    _dailyReports = apiService.getDailyReport();
+    _weeklyReports = apiService.getWeeklyReport();
   }
 
   @override
